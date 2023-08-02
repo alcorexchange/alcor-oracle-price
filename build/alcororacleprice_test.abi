@@ -1,0 +1,94 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.2",
+    "types": [],
+    "structs": [
+        {
+            "name": "consult",
+            "base": "",
+            "fields": [
+                {
+                    "name": "poolId",
+                    "type": "uint64"
+                },
+                {
+                    "name": "secondsAgo",
+                    "type": "uint32"
+                }
+            ]
+        },
+        {
+            "name": "getprice",
+            "base": "",
+            "fields": [
+                {
+                    "name": "poolId",
+                    "type": "uint64"
+                },
+                {
+                    "name": "twapInterval",
+                    "type": "uint32"
+                }
+            ]
+        },
+        {
+            "name": "oldestobser",
+            "base": "",
+            "fields": [
+                {
+                    "name": "poolId",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "tuple_int32_uint64",
+            "base": "",
+            "fields": [
+                {
+                    "name": "field_0",
+                    "type": "int32"
+                },
+                {
+                    "name": "field_1",
+                    "type": "uint64"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "consult",
+            "type": "consult",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "getprice",
+            "type": "getprice",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "oldestobser",
+            "type": "oldestobser",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [],
+    "kv_tables": {},
+    "ricardian_clauses": [],
+    "variants": [],
+    "action_results": [
+        {
+            "name": "consult",
+            "result_type": "tuple_int32_uint64"
+        },
+        {
+            "name": "getprice",
+            "result_type": "uint128"
+        },
+        {
+            "name": "oldestobser",
+            "result_type": "uint32"
+        }
+    ]
+}
