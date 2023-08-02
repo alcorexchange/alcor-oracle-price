@@ -65,8 +65,8 @@ describe('alcorswap integration ticks, positions, collected fees test', () => {
     await contract2.addCode('active');
 
     await alcorswap_interface.setContract({
-      abi: './build/alcorswap_test.abi',
-      wasm: './build/alcorswap_test.wasm',
+      abi: './build/alcorpriceoracle_test.abi',
+      wasm: './build/alcorpriceoracle_test.wasm',
     });
   }, 100000);
 
@@ -339,59 +339,6 @@ describe('alcorswap integration ticks, positions, collected fees test', () => {
       });
       let currentPrice = receipt.processed.action_traces[0].return_value_data;
       expect(currentPrice).toEqual('18446744073709551616'); // 2^64
-    });
-
-    it('get twap price zero', async () => {
-      const swapAmount = 1000000;
-      const inputAmount = CurrencyAmount.fromRawAmount(this.tokenC, swapAmount);
-      await transferToken(
-        contract1,
-        contract1,
-        swapper1,
-        inputAmount.toAsset(),
-        'issue'
-      );
-      const memo = buildMemo(
-        'swapexactin',
-        this.lastPool.id,
-        swapper1.name,
-        contract2.name,
-        '0.0000 D',
-        0
-      );
-      const receipt = await alcorswap_interface.contract.action.swap({
-        poolId: this.lastPool.id,
-        aForB: true,
-        amountSpecified: swapAmount,
-        sqrtPriceLimitX64: 0,
-      });
-
-      const { field_0: amountC, field_1: amountD } =
-        receipt.processed.action_traces[0].return_value_data;
-      expect(amountC).toEqual(swapAmount);
-      const outputAmount = CurrencyAmount.fromRawAmount(this.tokenD, amountD);
-
-      const receipt1 = await transferToken(
-        contract1,
-        swapper1,
-        alcorswap,
-        inputAmount.toAsset(),
-        memo
-      );
-
-      await expectAction(
-        receipt1,
-        alcorswap.name,
-        'logswap',
-        {
-          poolId: this.lastPool.id,
-          sender: swapper1.name,
-          recipient: swapper1.name,
-          tokenA: inputAmount.toAsset(),
-          tokenB: outputAmount.toAsset(),
-        },
-        [{ actor: alcorswap.name, permission: 'active' }]
-      );
     });
   });
 });

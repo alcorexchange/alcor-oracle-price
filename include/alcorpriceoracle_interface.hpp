@@ -1,17 +1,18 @@
 // "Copyright [2023] <alcor exchange>"
-#ifndef INCLUDE_ALCORORACLEPRICE_INTERFACE_HPP_
-#define INCLUDE_ALCORORACLEPRICE_INTERFACE_HPP_
+#ifndef INCLUDE_ALCORPRICEORACLE_INTERFACE_HPP_
+#define INCLUDE_ALCORPRICEORACLE_INTERFACE_HPP_
 
+#include <string>
+#include <tuple>
+#include <vector>
 #include <eosio/asset.hpp>
 #include <eosio/eosio.hpp>
 #include <eosio/singleton.hpp>
-#include <string>
-#include <tuple>
 
 #include "libs/oracle.hpp"
 #include "libs/tick_math.hpp"
 
-namespace AlcorOraclePrice {
+namespace AlcorPriceOracle {
 static constexpr eosio::name ALCOR_SWAP_ACCOUNT = eosio::name("swap.alcor");
 
 static eosio::checksum256 makePoolKey(eosio::extended_asset tokenA, eosio::extended_asset tokenB) {
@@ -71,7 +72,7 @@ PoolS getPool(uint64_t poolId) {
 /// @param secondsAgo Number of seconds in the past from which to calculate the time-weighted means
 /// @return arithmeticMeanTick The arithmetic mean tick from (block.timestamp - secondsAgo) to block.timestamp
 /// @return harmonicMeanLiquidity The harmonic mean liquidity from (block.timestamp - secondsAgo) to block.timestamp
-std::tuple<int32_t, uint64_t> consult(uint64_t poolId, uint32_t secondsAgo){
+std::tuple<int32_t, uint64_t> consult(uint64_t poolId, uint32_t secondsAgo) {
   auto pool = getPool(poolId);
   eosio::check(secondsAgo != 0, "Seconds ago cannot be zero.");
 
@@ -91,17 +92,16 @@ std::tuple<int32_t, uint64_t> consult(uint64_t poolId, uint32_t secondsAgo){
 
   int32_t arithmeticMeanTick = int32_t(tickCumulativesDelta / secondsAgo);
   // Always round to negative infinity
-  if (tickCumulativesDelta < 0 && (tickCumulativesDelta % secondsAgo != 0)){
+  if (tickCumulativesDelta < 0 && (tickCumulativesDelta % secondsAgo != 0)) {
     arithmeticMeanTick--;
   }
-    
   uint128_t secondsAgoX64 = uint128_t(secondsAgo) << 64;
   uint64_t harmonicMeanLiquidity = uint64_t(secondsAgoX64 / secondsPerLiquidityCumulativesDelta);
   return {tickCumulativesDelta, harmonicMeanLiquidity};
 }
 
 /// @notice Given a pool, it returns the number of seconds ago of the oldest stored observation
-/// @param pool Id of AlcorOraclePrice pool that we want to observe
+/// @param pool Id of AlcorPriceOracle pool that we want to observe
 /// @return secondsAgo The number of seconds ago of the oldest observation stored for the pool
 uint32_t getOldestObservationSecondsAgo(uint64_t poolId) {
   auto pool = getPool(poolId);
@@ -153,5 +153,5 @@ uint128_t getPriceTwapX64(uint64_t poolId, uint32_t twapInterval) {
     return getPriceX64FromSqrtPriceX64(sqrtPriceX64);
   }
 }
-};      // namespace AlcorOraclePrice
-#endif  // INCLUDE_ALCORORACLEPRICE_INTERFACE_HPP_"
+};      // namespace AlcorPriceOracle
+#endif  // INCLUDE_ALCORPRICEORACLE_INTERFACE_HPP_

@@ -1,6 +1,6 @@
 ## Build
 ```
-$ eosio-cpp -I include -w --abigen ./src/alcororacleprice_test.cpp -o ./build/alcororacleprice_test.wasm
+$ eosio-cpp -I include -w --abigen ./src/alcorpriceoracle_test.cpp -o ./build/alcorpriceoracle_test.wasm
 ```
 
 ## Test
