@@ -291,8 +291,8 @@ describe('alcorswap integration ticks, positions, collected fees test', () => {
       );
 
       // bob provide liquidity
-      await transferToken(contract1, contract1, bob, '50000.0000 C', 'issue');
-      await transferToken(contract2, contract2, bob, '50000.0000 D', 'issue');
+      await transferToken(contract1, contract1, bob, '5000000.0000 C', 'issue');
+      await transferToken(contract2, contract2, bob, '5000000.0000 D', 'issue');
 
       await transferToken(contract1, bob, alcorswap, '50000.0000 C', 'deposit');
       await transferToken(contract2, bob, alcorswap, '50000.0000 D', 'deposit');
@@ -338,7 +338,96 @@ describe('alcorswap integration ticks, positions, collected fees test', () => {
         twapInterval: 0,
       });
       let currentPrice = receipt.processed.action_traces[0].return_value_data;
+      // PirceCInD = 1.0000 https://www.wolframalpha.com/input?i2d=true&i=Divide%5B18446744073709551616%2CPower%5B2%2C64%5D%5D
       expect(currentPrice).toEqual('18446744073709551616'); // 2^64
+
+      // Expanding Price Availability
+      bob.transfer(
+        alcorswap.name,
+        chain.coreSymbol.convertAssetString(5.0),
+        'addoraclerow#' + this.lastPool.id
+      )
+
+      const swapAmount = 1000000;
+      const inputAmount = CurrencyAmount.fromRawAmount(this.tokenC, swapAmount);
+      await transferToken(
+        contract1,
+        contract1,
+        swapper1,
+        inputAmount.toAsset(),
+        'issue'
+      );
+      const memo = buildMemo(
+        'swapexactin',
+        this.lastPool.id,
+        swapper1.name,
+        contract2.name,
+        '0.0000 D',
+        0
+      );
+      receipt = await transferToken(
+        contract1,
+        bob,
+        alcorswap,
+        '1000.0000 C',
+        memo
+      );
+      // "tick": -395,
+      // console.log(JSON.stringify(receipt, null, 4));
+      receipt = await alcorswap_interface.contract.action.getprice({
+        poolId: this.lastPool.id,
+        twapInterval: 0,
+      });
+      currentPrice = receipt.processed.action_traces[0].return_value_data;
+      // PirceCInD = 0.9612 https://www.wolframalpha.com/input?i2d=true&i=Divide%5B17732520636676669117%2CPower%5B2%2C64%5D%5D
+      expect(currentPrice).toEqual('17732520636676669117'); // 2^64
+
+      let observations =
+      await alcorswap.contract.table.observations.getRows({
+        scope: this.lastPool.id,
+      });
+      // console.log("observations1", observations)
+      await chain.time.increase(30 * 60); // add 30 mins
+
+      receipt = await transferToken(
+        contract1,
+        bob,
+        alcorswap,
+        '10000.0000 C',
+        memo
+      );
+      // "tick": -3967,
+      // console.log(JSON.stringify(receipt, null, 4));
+
+      receipt = await alcorswap_interface.contract.action.getprice({
+        poolId: this.lastPool.id,
+        twapInterval: 0,
+      });
+      currentPrice = receipt.processed.action_traces[0].return_value_data;
+      // PirceCInD = 0.6725 https://www.wolframalpha.com/input?i2d=true&i=Divide%5B12407094231207498696%2CPower%5B2%2C64%5D%5D
+      expect(currentPrice).toEqual('12407094231207498696'); // 2^64
+
+      // check number of seconds ago
+      receipt = await alcorswap_interface.contract.action.oldestobser({
+        poolId: this.lastPool.id,
+      });
+      const secondAgo = receipt.processed.action_traces[0].return_value_data;
+      expect(secondAgo).toBeGreaterThanOrEqual(30 * 60); // 2^64
+
+      observations =
+      await alcorswap.contract.table.observations.getRows({
+        scope: this.lastPool.id,
+      });
+      // console.log("observations2", observations)
+      // Get Avarage Price in 30mins
+      receipt = await alcorswap_interface.contract.action.getprice({
+        poolId: this.lastPool.id,
+        twapInterval: 30 * 60, // 30 mins
+      });
+      currentPrice = receipt.processed.action_traces[0].return_value_data;
+      // PirceCInD = 0.8577 https://www.wolframalpha.com/input?i2d=true&i=Divide%5B16423113743151524531%2CPower%5B2%2C64%5D%5D
+      // expect(currentPrice).toEqual('17732335846005255389'); // 2^64
+      // Todo: check average price
     });
   });
 });

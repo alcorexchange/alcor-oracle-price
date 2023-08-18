@@ -11,6 +11,7 @@
 
 #include "libs/oracle.hpp"
 #include "libs/tick_math.hpp"
+#include "libs/helper.hpp"
 
 namespace AlcorPriceOracle {
 static constexpr eosio::name ALCOR_SWAP_ACCOUNT = eosio::name("swap.alcor");
@@ -141,7 +142,7 @@ uint128_t getPriceTwapX64(uint64_t poolId, uint32_t twapInterval) {
     return getPriceX64FromSqrtPriceX64(pool.currSlot.sqrtPriceX64);
   } else {
     uint32_t time = eosio::current_time_point().sec_since_epoch();
-    std::vector<uint32_t>secondsAgos(2);
+    std::vector<uint32_t>secondsAgos;
     secondsAgos.push_back(twapInterval);  // from (before)
     secondsAgos.push_back(0);             // to (now)
     std::vector<int64_t> tickCumulatives;
