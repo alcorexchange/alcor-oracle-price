@@ -46,12 +46,11 @@ ObservationS transform(const ObservationS& lastObservation, uint32_t timestampIn
   return newObservation;
 }
 
-/// @notice Initialize the oracle array by writing the first slot. Called once for the lifecycle of the observations
-/// array
-/// @param self The stored oracle array
-/// @param time The time of the oracle initialization, via block.timestamp truncated to uint32
-/// @return cardinality The number of populated elements in the oracle array
-/// @return cardinalityNext The new length of the oracle array, independent of population
+/// @brief Initializes the oracle array by adding the first observation
+/// @param code The contract's name
+/// @param ram_payer The account responsible for RAM costs
+/// @param poolId The ID of the pool
+/// @param time The initialization timestamp
 void initialize(eosio::name code, eosio::name ram_payer, uint64_t poolId, uint32_t time) {
   observations_t observations_table(code, poolId);
   observations_table.emplace(ram_payer, [&](auto& row) {
@@ -61,6 +60,10 @@ void initialize(eosio::name code, eosio::name ram_payer, uint64_t poolId, uint32
   });
 }
 
+/// @brief Fetches the latest observation in the oracle array
+/// @param code The contract's name
+/// @param poolId The ID of the pool
+/// @return The latest observation
 ObservationS lastObservation(eosio::name code, uint64_t poolId) {
   observations_t observations_table(code, poolId);
   eosio::check(observations_table.begin() != observations_table.end(), "EmptyObservation");
@@ -69,6 +72,16 @@ ObservationS lastObservation(eosio::name code, uint64_t poolId) {
   return *last;
 }
 
+/// @brief Writes a new observation into the oracle array
+/// @param code The contract's name
+/// @param ram_payer The account responsible for RAM costs
+/// @param poolId The ID of the pool
+/// @param timestamp The timestamp of the new observation
+/// @param tick The current tick value
+/// @param liquidity The total liquidity at the time of the new observation
+/// @param currentObservationNum The current observation count
+/// @param maxObservationNum The maximum allowed observation count
+/// @return A tuple containing updated observation timestamp and observation number
 std::tuple<uint32_t, uint32_t> write(eosio::name code, eosio::name ram_payer, uint64_t poolId, uint32_t timestamp,
                                      int32_t tick, uint64_t liquidity, uint32_t currentObservationNum,
                                      uint32_t maxObservationNum) {
